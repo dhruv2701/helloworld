@@ -1,0 +1,248 @@
+#include<iostream>
+#include<fstream>
+#include<iomanip>
+using namespace std;
+struct node
+{
+        char data;
+        int freq;
+        node *left;
+        node *right;
+};
+int height(node *root)
+{
+        if(root==NULL)return -1;
+        int lh=height(root->left);
+        int rh=height(root->right);
+        return max(lh,rh)+1;
+
+}
+void inorder(node *root)
+{
+        if(root==NULL)
+        return;
+        inorder(root->left);
+        cout<<root->freq<<" ";
+        inorder(root->right);
+}
+void levelot(node *root,int level)
+{
+                if(root==NULL)
+                return;
+                else if(level==0)
+                cout<<root->freq<<" ";
+                else if(level>0)
+                {
+                        levelot(root->left,level-1);
+                        levelot(root->right,level-1);
+                }
+}
+void levelorder(node *root)
+{
+        int ht=height(root);
+        for(int i=0;i<=ht;i++)
+        {
+                levelot(root,i);
+        }
+}
+node *newnode(char data,int freq)
+{
+    node *temp=new node;
+    temp->data=data;
+    temp->freq=freq;
+    temp->left=temp->right=NULL;
+    return temp;
+}
+void restoredown(node arr[],int i,int hsize)
+{       node num=arr[i];
+        int left=(2*i);
+        int right=left+1;
+        while(right<=hsize){
+        if(num.freq<=arr[left].freq && num.freq<=arr[right].freq)
+        {
+                arr[i]=num;
+                return;
+        }
+        else if(arr[left].freq<=arr[right].freq)
+        {
+                arr[i]=arr[left];
+                i=left;
+        }
+        else if(arr[left].freq>=arr[right].freq)
+        {
+                arr[i]=arr[right];
+                i=right;
+        }
+        left=2*i;
+        right=left+1;
+        }
+        if(left==hsize&&num.freq>=arr[left].freq)
+        {
+                arr[i]=arr[left];
+                i=left;
+        }
+        arr[i]=num;
+}
+void buildheap(node arr[],int hsize)
+{
+    for(int i=hsize/2;i>=1;i--)
+    {
+        restoredown(arr,i,hsize);
+    }
+}
+node* deletef(node arr[],int &size)
+{
+        node min=arr[1];
+        arr[1]=arr[size];
+        size--;
+        restoredown(arr,1,size);
+        node *z=new node;
+        z->data=min.data;
+        z->freq=min.freq;
+        z->left=min.left;
+        z->right=min.right;
+        return z;
+}
+void restoreup(node arr[],int j)
+{
+        node k=arr[j];
+        int parent=j/2;
+        while(arr[parent].freq>k.freq)
+        {
+                arr[j]=arr[parent];
+                j=parent;
+                parent=j/2;
+        }
+        arr[j]=k;
+}
+void insert(node arr[],node *z,int &size)
+{
+        size++;
+        arr[size]=*z;
+        restoreup(arr,size);
+}
+node* huffman(node arr[],int &size)
+{       while(size>1)
+      {
+        node *one=deletef(arr,size);
+        node *two=deletef(arr,size);
+        node *other=new node;
+        other->data='\0';
+        other->freq=one->freq+two->freq;
+        other->left=one;
+        other->right=two;
+        insert(arr,other,size);
+      }
+      return deletef(arr,size);
+}
+void printarr(int arr[],int n)
+{
+    for(int i=0;i<n;i++)
+    {
+        cout<<arr[i];
+    }
+    cout<<endl;
+}
+void encode(node *root,int level,int *arr)
+{
+    if(root->left!=NULL)
+    {
+        arr[level]=0;
+        encode(root->left,level+1,arr);
+    }
+    if(root->right!=NULL)
+    {
+        arr[level]=1;
+        encode(root->right,level+1,arr);
+    }
+    if(root->left==NULL&&root->right==NULL)
+    {
+        cout<<root->data<<setw(16);
+        cout<<root->freq<<setw(16);
+        printarr(arr,level);
+    }
+
+}
+
+int main()
+{
+    char ch;
+    ofstream fout;
+    ifstream myfile;
+    ofstream myfile1;
+    fout.open("xyz.txt");
+    fout<<"thpppkkkffxxxxx";
+    fout.close();
+    myfile.open("xyz.txt");
+    myfile1.open("xyz1.txt");
+    ch=myfile.get();
+    while(!myfile.eof())
+    {
+        if(ch=='t' || ch=='T'||ch=='h' || ch=='H'||ch=='f' || ch=='F'||ch=='k' || ch=='K'||ch=='p' || ch=='P'||ch=='x' || ch=='X')
+        {
+            myfile1<<ch;
+        }
+        ch=myfile.get();
+    }
+    myfile.close();
+    myfile1.close();
+    ifstream file;
+    file.open("xyz1.txt");
+    ch=file.get();
+    while(!file.eof())
+    {
+        ch=file.get();
+    }
+    file.close();
+    int count_t=0,count_h=0,count_f=0,count_k=0,count_p=0,count_x=0;
+    file.open("xyz1.txt");
+    ch=file.get();
+    while(!file.eof())
+    {
+        if(ch=='t'||ch=='T')
+            count_t++;
+        if(ch=='h'||ch=='H')
+            count_h++;
+        if(ch=='f'||ch=='F')
+            count_f++;
+        if(ch=='k'||ch=='K')
+            count_k++;
+        if(ch=='p'||ch=='P')
+            count_p++;
+        if(ch=='x'||ch=='X')
+            count_x++;
+
+            ch=file.get();
+    }
+    file.close();
+    node *z=newnode('z',-99);
+    node *t=newnode('t',count_t);
+    node *h=newnode('h',count_h);
+    node *f=newnode('f',count_f);
+    node *k=newnode('k',count_k);
+    node *p=newnode('p',count_p);
+    node *x=newnode('x',count_x);
+    node arr[]={*z,*t,*h,*f,*k,*p,*x};
+    cout<<"build heap: ";
+    buildheap(arr,6);
+    int size=6;
+    for(int i=1;i<=size;i++)
+    cout<<arr[i].freq<<" ";
+    cout<<endl;
+    node *root=huffman(arr,size);
+    cout<<"levelorder traversal:"<<endl;
+    levelorder(root);
+    cout<<endl<<"tree in inorder:"<<endl;
+    inorder(root);
+    cout<<endl;
+    //int *temparr=new int[10];
+    int temparr[10];
+    encode(root,0,temparr);
+    char freq[size]={'t','h','f','k','p','x'};
+    //cout<<"character"<<"   "<<"frequency"<<"   "<<"huffman bits"<<endl;
+    char **storecount=new char*[size];
+    for(int i=0;i<size;i++)
+        storecount[i]=new char[10];
+    //encode(root,0,temparr,freq,storecount);
+
+}
